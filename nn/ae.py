@@ -34,8 +34,6 @@ class AE(nn.Module):
         return x_hat, z
 
     def recon_loss(self, x: torch.Tensor, x_hat: torch.Tensor):
-        # x: (batch_size, 1, 28, 28)
-        # x_hat: (batch_size, 1, 28, 28)
         return F.mse_loss(x_hat, x, reduction='none').sum(dim=[1, 2, 3])
     
     def loss(self, batch, **_):
