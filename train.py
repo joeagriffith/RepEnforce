@@ -5,6 +5,7 @@ from typing import Optional, Union, List, Dict
 from torch.utils.data import DataLoader
 import numpy as np
 from tqdm import tqdm
+import os
 
 
 def train(
@@ -17,6 +18,7 @@ def train(
         writer: Optional[SummaryWriter] = None,
         compute_dtype: Optional[torch.dtype] = None,
         epoch_hyperparams: Dict[str, torch.Tensor] = {},
+        save_dir: Optional[str] = None,
 ):
     """
     Train a model for a given number of epochs.
@@ -38,15 +40,17 @@ def train(
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 
+    best_val_loss = np.inf
+
     loop = tqdm(range(num_epochs), desc='Epochs', leave=False)
     for epoch in loop:
 
         # ============================ DATA AUGMENTATION ============================
 
         if hasattr(train_dataset, 'augment') and train_dataset.augment:   
-            train_dataset.apply_transforms()
+            train_dataset.apply_transform()
         if hasattr(val_dataset, 'augment') and val_dataset.augment:
-            val_dataset.apply_transforms()
+            val_dataset.apply_transform()
         
         # ========================== HYPERPARAMETER UPDATE ==========================
 
@@ -107,3 +111,7 @@ def train(
                 writer.add_scalar(f'val/{key}', value, epoch)
 
         loop.set_postfix({key: round(value, 3) for key, value in epoch_train_metrics.items()})
+        
+        if save_dir is not None and epoch_val_metrics['loss'] < best_val_loss:
+            best_val_loss = epoch_val_metrics['loss']
+            torch.save(model.state_dict(), save_dir)

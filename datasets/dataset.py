@@ -112,7 +112,9 @@ class PreloadedDataset(Dataset):
     #  Transforms the data in batches so as not to overload memory
     def apply_transform(self, device=torch.device('cuda'), batch_size=500):
         if self.transform is not None:
-            print(f'transform is {self.transform}')
+            if not hasattr(self, 'transformed_images'):
+                self.transformed_images = torch.zeros_like(self.images)
+
             if device is None:
                 device = self.device
             
