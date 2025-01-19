@@ -5,6 +5,7 @@ from nn.modules.cnn import ConvEncoder, ConvDecoder
 from nn.modules.mlp import MLPEncoder, MLPBottleneck, MLPDecoder, MLP
 import torchvision.transforms.v2.functional as F_v2
 
+
 class EnforcedAE(nn.Module):
     def __init__(self, z_dim:int, cnn:bool=False, **kwargs):
         super().__init__()
